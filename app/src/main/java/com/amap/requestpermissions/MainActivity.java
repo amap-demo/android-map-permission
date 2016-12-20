@@ -29,6 +29,7 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 
 public class MainActivity extends FragmentActivity implements AMapLocationListener, View.OnClickListener, HintDialogFragment.DialogFragmentCallback{
@@ -40,6 +41,7 @@ public class MainActivity extends FragmentActivity implements AMapLocationListen
     private static final int STORAGE_PERMISSION_CODE = 101;
     private Button locbtn;
     private Button stobtn;
+    private Marker locMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,10 +110,19 @@ public class MainActivity extends FragmentActivity implements AMapLocationListen
                 // Show an expanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
-                DialogFragment newFragment = HintDialogFragment.newInstance(R.string.storage_description_title,
-                        R.string.storage_description_why_we_need_the_permission,
-                        permissioncode);
-                newFragment.show(getFragmentManager(), HintDialogFragment.class.getSimpleName());
+                if(permissioncode == LOCATION_PERMISSION_CODE) {
+                    DialogFragment newFragment = HintDialogFragment.newInstance(R.string.location_description_title,
+                            R.string.location_description_why_we_need_the_permission,
+                            permissioncode);
+                    newFragment.show(getFragmentManager(), HintDialogFragment.class.getSimpleName());
+                } else if (permissioncode == STORAGE_PERMISSION_CODE) {
+                    DialogFragment newFragment = HintDialogFragment.newInstance(R.string.storage_description_title,
+                            R.string.storage_description_why_we_need_the_permission,
+                            permissioncode);
+                    newFragment.show(getFragmentManager(), HintDialogFragment.class.getSimpleName());
+                }
+
+
             } else {
                 Log.i("MY","返回false 不需要解释为啥要权限，可能是第一次请求，也可能是勾选了不再询问");
                 ActivityCompat.requestPermissions(MainActivity.this,
@@ -143,13 +154,21 @@ public class MainActivity extends FragmentActivity implements AMapLocationListen
             double longitude = aMapLocation.getLongitude();
             double latitude = aMapLocation.getLatitude();
             LatLng location = new LatLng(latitude, longitude);
-            amap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
-            amap.addMarker(new MarkerOptions().position(location));
+            changeLocation(location);
         } else {
             String errText = "定位失败," + aMapLocation.getErrorCode() + ": " + aMapLocation.getErrorInfo();
             Log.e("AmapErr", errText);
             Toast.makeText(MainActivity.this, errText, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void changeLocation(LatLng location) {
+        if (locMarker == null){
+            locMarker = amap.addMarker(new MarkerOptions().position(location));
+        }else{
+            locMarker.setPosition(location);
+        }
+        amap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
     }
 
     /**
@@ -271,9 +290,9 @@ public class MainActivity extends FragmentActivity implements AMapLocationListen
             case  R.id.locbtn:
                 checkLocationPermission();
                 break;
-            case R.id.stobtn:
-                checkStoragePermission();
-                break;
+//            case R.id.stobtn:
+//                checkStoragePermission();
+//                break;
         }
 
     }

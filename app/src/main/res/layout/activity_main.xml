@@ -26,7 +26,8 @@
             android:id="@+id/stobtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="动态申请存储权限" />
+            android:text="动态申请存储权限"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </FrameLayout>
